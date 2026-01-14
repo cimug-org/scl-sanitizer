@@ -1,5 +1,5 @@
 # scl-sanitizer
-<img src="images/scl-sanitizer-logo-trans-bkgd.png" alt="alt text" width="10%" />
+<img src="images/scl-sanitizer-logo.png" alt="alt text" width="15%" />
 
 \[[GitHub Repo](https://github.com/cimug-org/scl-sanitizer)\]
 

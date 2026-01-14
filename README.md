@@ -1,8 +1,6 @@
 # scl-sanitizer
-Open source application for anonymizing IEC 61850 SCL instance files
+<img src="images/scl-sanitizer-logo-trans-bkgd.png" alt="alt text" width="10%" />
 
-
-![image](images/scl-sanitizer-logo.png)  
 \[[GitHub Repo](https://github.com/cimug-org/scl-sanitizer)\]
 
 **SCL Sanitizer** is an open source tool for for anonymizing IEC 61850 SCL instance files.

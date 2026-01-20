@@ -93,9 +93,6 @@ python scl_sanitizer_v2.9.0.py --seed 42 --debug substation_example.scl
 ```
 This will write a file named `substation_example_sanitized.scl` in the same directory, with seed-based determinism and verbose debug output.
 
----
-```
-
 # IEC 61850 SCL Sanitization Rules
 
 ## 0. Scope, Goals, Definitions

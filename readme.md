@@ -17,6 +17,85 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 
 **SCL Sanitizer** is an open source tool for for anonymizing IEC 61850 SCL files and removing sensitive network-related information.
 
+## Command-Line Interface (CLI) Usage
+
+The SCL sanitizer is provided as a command-line tool, typically invoked as:
+
+```bash
+python scl_sanitizer_v2.9.0.py [options] <path-to-input-SCL-file>
+```
+
+### Basic Usage
+
+To sanitize an SCL file non-deterministically (default random mode):
+
+```bash
+python scl_sanitizer_v2.9.0.py example.scl
+```
+
+- Output is written to `example_sanitized.scl` (same directory as input).
+- Original file is not modified.
+
+### Deterministic Output Options
+
+You can produce sanitized output deterministically (so the same input will generate the same output and IDs, useful for test fixtures and reproducibility):
+
+#### Using Explicit Seed
+
+```bash
+python scl_sanitizer_v2.9.0.py --seed 12345 example.scl
+```
+
+- The same seed and input file will always generate the same sanitized output.
+
+#### Using Hash-Based Seed
+
+```bash
+python scl_sanitizer_v2.9.0.py --hash-seed example.scl
+```
+
+- The file's byte content is hashed to derive a unique seed.
+- Any change in the SCL file (even whitespace) changes the output.
+
+You cannot supply both `--seed` and `--hash-seed` at the same time.
+
+### Debug Output
+
+Add `--debug` to print extra diagnostic output:
+
+```bash
+python scl_sanitizer_v2.9.0.py --debug example.scl
+```
+
+### Error Handling
+
+- If the input is not a valid SCL XML file, or a validation rule is violated (such as randomization producing duplicate or too-long identifiers), the CLI exits with an error message.
+- If the SCL file is invalid, or contains structures not supported, the tool may report the validation issue, including a line reference when possible.
+
+### Version Comments in Output
+
+- The sanitizer always inserts a version comment, e.g. `<!-- SanitizerVersion=v2.9.0 -->` immediately after the XML declaration.
+- With deterministic runs (`--seed` or `--hash-seed`), the CLI also inserts comments for the seed and seed source.
+
+### CLI Options Summary
+
+| Option            | Description                                                                      |
+|-------------------|----------------------------------------------------------------------------------|
+| `--seed <int>`    | Set explicit deterministic PRNG seed.                                            |
+| `--hash-seed`     | Use the input file's hash to derive deterministic seed.                          |
+| `--debug`         | Print debug output to stderr.                                                    |
+| `<input file>`    | Path to SCL XML file to be sanitized (required).                                 |
+
+### Example
+
+```bash
+python scl_sanitizer_v2.9.0.py --seed 42 --debug substation_example.scl
+```
+This will write a file named `substation_example_sanitized.scl` in the same directory, with seed-based determinism and verbose debug output.
+
+---
+```
+
 # IEC 61850 SCL Sanitization Rules
 
 ## 0. Scope, Goals, Definitions

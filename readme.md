@@ -232,7 +232,6 @@ Regenerate (preferred) or truncate (fallback) to meet limits (implementation reg
 - Version bump to 2.9.0.
 
 ## 20. Substation Topology
-## 20. Substation Topology
 
 20.1 Randomize the `@name` attribute of every element in the `<Substation>` hierarchy. This includes:
 

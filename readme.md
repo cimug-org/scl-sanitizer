@@ -232,14 +232,30 @@ Regenerate (preferred) or truncate (fallback) to meet limits (implementation reg
 - Version bump to 2.9.0.
 
 ## 20. Substation Topology
-20.1 Randomize the `@name` attribute of ANY element within the `<Substation>` hierarchy (e.g., `Substation`, `VoltageLevel`, `Bay`, `ConductingEquipment`, `ConnectivityNode`, `Terminal`, `SubEquipment`).
+## 20. Substation Topology
+
+20.1 Randomize the `@name` attribute of every element in the `<Substation>` hierarchy. This includes:
+
+- `<Substation>`
+- `<VoltageLevel>`
+- `<Bay>`
+- `<ConductingEquipment>`
+- `<ConnectivityNode>`
+- `<Terminal>`
+- `<SubEquipment>`
+
+If an element beneath `<Substation>` has a `name` attribute, that attribute must be randomized.
+
 20.2 All topology names share a single randomization namespace (`Topology.name`) to facilitate path reconstruction.
-20.3 Reconstruct `Terminal@connectivityNode` attributes.
-    - Split original path string by `/`.
-    - Map each segment to its new randomized name.
-    - Rejoin segments to form the new path.
-    - Updates MUST respect the hierarchy: `SubstationName/VoltageLevelName/BayName/ConnectivityNodeName`.
-20.4 Reconstruct `ConnectivityNode@pathName` using the same logic.
+
+20.3 Reconstruct `Terminal@connectivityNode` attributes:
+
+- Split the original path string by `/`.
+- Map each segment to its new randomized name.
+- Rejoin segments to form the updated path.
+- The result must maintain the pattern: `SubstationName/VoltageLevelName/BayName/ConnectivityNodeName`.
+
+20.4 Similarly, reconstruct the `ConnectivityNode@pathName` attribute using the same logic.
 
 ## Security / Privacy Note
 - Deterministic hash seeding can correlate identical originals across organizations.

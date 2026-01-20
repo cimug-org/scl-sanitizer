@@ -22,7 +22,7 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 The SCL sanitizer is provided as a command-line tool, typically invoked as:
 
 ```bash
-python scl_sanitizer_v2.9.0.py [options] <path-to-input-SCL-file>
+python scl_sanitizer.py [options] <path-to-input-SCL-file>
 ```
 
 ### Basic Usage
@@ -30,7 +30,7 @@ python scl_sanitizer_v2.9.0.py [options] <path-to-input-SCL-file>
 To sanitize an SCL file non-deterministically (default random mode):
 
 ```bash
-python scl_sanitizer_v2.9.0.py example.scl
+python scl_sanitizer.py example.scl
 ```
 
 - Output is written to `example_sanitized.scl` (same directory as input).
@@ -43,7 +43,7 @@ You can produce sanitized output deterministically (so the same input will gener
 #### Using Explicit Seed
 
 ```bash
-python scl_sanitizer_v2.9.0.py --seed 12345 example.scl
+python scl_sanitizer.py --seed 12345 example.scl
 ```
 
 - The same seed and input file will always generate the same sanitized output.
@@ -51,7 +51,7 @@ python scl_sanitizer_v2.9.0.py --seed 12345 example.scl
 #### Using Hash-Based Seed
 
 ```bash
-python scl_sanitizer_v2.9.0.py --hash-seed example.scl
+python scl_sanitizer.py --hash-seed example.scl
 ```
 
 - The file's byte content is hashed to derive a unique seed.
@@ -64,7 +64,7 @@ You cannot supply both `--seed` and `--hash-seed` at the same time.
 Add `--debug` to print extra diagnostic output:
 
 ```bash
-python scl_sanitizer_v2.9.0.py --debug example.scl
+python scl_sanitizer.py --debug example.scl
 ```
 
 ### Error Handling
@@ -89,7 +89,7 @@ python scl_sanitizer_v2.9.0.py --debug example.scl
 ### Example
 
 ```bash
-python scl_sanitizer_v2.9.0.py --seed 42 --debug substation_example.scl
+python scl_sanitizer.py --seed 42 --debug substation_example.scl
 ```
 This will write a file named `substation_example_sanitized.scl` in the same directory, with seed-based determinism and verbose debug output.
 

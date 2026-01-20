@@ -93,6 +93,28 @@ python scl_sanitizer.py --seed 42 --debug substation_example.scl
 ```
 This will write a file named `substation_example_sanitized.scl` in the same directory, with seed-based determinism and verbose debug output.
 
+### Python Version Requirement
+
+The SCL Sanitizer requires **Python 3.7 or newer** to run properly.
+
+You can check your current Python version with:
+
+```bash
+python --version
+```
+or
+```bash
+python3 --version
+```
+
+If your version is lower than 3.7, you will need to [download and install a newer Python 3 release](https://www.python.org/downloads/).
+
+> **Note:** This tool also requires the `lxml` library. Install it using:
+>
+> ```bash
+> pip install lxml
+> ```
+
 # IEC 61850 SCL Sanitization Rules
 
 ## 0. Scope, Goals, Definitions

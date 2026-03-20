@@ -501,6 +501,18 @@ def synchronize_references(root: ET._Element, reg: IdRegistry):
         new_path = "/".join(new_parts)
         term.set("connectivityNode", new_path)
 
+        # Also update the dedicated Terminal attributes (Rule 21.2)
+        attr_to_cat = {
+            "substationName":   "Substation.name",
+            "voltageLevelName": "VoltageLevel.name",
+            "bayName":          "Bay.name",
+            "cNodeName":        "ConnectivityNode.name",
+        }
+        for attr, cat in attr_to_cat.items():
+            old_val = term.get(attr)
+            if old_val and reg.has_old(cat, old_val):
+                term.set(attr, reg.new(cat, old_val))
+
     # Also update the pathName attribute on the ConnectivityNode itself
     for cn in root.xpath(".//scl:ConnectivityNode", namespaces=NSMAP):
         old_path = cn.get("pathName")

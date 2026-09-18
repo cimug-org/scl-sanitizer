@@ -15,7 +15,7 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 -->
 <img src="images/scl-sanitizer-logo.png" alt="alt text" width="25%" />
 
-**SCL Sanitizer** is an open source tool for for anonymizing IEC 61850 SCL files and removing sensitive network-related information.
+**SCL Sanitizer** is an open source tool for anonymizing IEC 61850 SCL files and removing sensitive network-related information.
 
 ## Command-Line Interface (CLI) Usage
 
@@ -91,6 +91,7 @@ python scl_sanitizer.py --debug example.scl
 ```bash
 python scl_sanitizer.py --seed 42 --debug substation_example.scl
 ```
+
 This will write a file named `substation_example_sanitized.scl` in the same directory, with seed-based determinism and verbose debug output.
 
 ### Python Version Requirement
@@ -102,7 +103,9 @@ You can check your current Python version with:
 ```bash
 python --version
 ```
+
 or
+
 ```bash
 python3 --version
 ```
@@ -114,6 +117,40 @@ If your version is lower than 3.7, you will need to [download and install a newe
 > ```bash
 > pip install lxml
 > ```
+
+## Fixture-Driven Test Coverage
+
+The project includes a pytest suite that operates on real SCL fixture files stored under `tests/fixtures`.
+
+### Supported fixture extensions
+
+The test suite automatically discovers SCL inputs with these extensions:
+
+- `.scd`
+- `.ssd`
+- `.cid`
+- `.icd`
+- `.iid`
+- `.sed`
+- `.scl`
+
+This is intentionally broad so the project can validate sanitizer behavior across different IEC 61850 file types, including sparse files that do not include every optional structure.
+
+### Important fixture behavior
+
+- The sanitizer is run against a copy of each fixture in a temporary directory.
+- Generated sanitized files are never left in the repository tree.
+- Files with names ending in `_sanitized` are ignored by fixture discovery.
+- Optional structures such as `ExtRef`, `Terminal`, `ConnectivityNode`, or `DataSet` are checked only when the file actually contains them.
+- Tests do not require every fixture to include every feature; sparse or smaller SCL files are still valid inputs.
+
+### Running the tests
+
+```bash
+python -m pytest -q
+```
+
+This applies the same sanitizer behavior to each file in `tests/fixtures`, using a deterministic seed, and verifies key anonymization invariants across the fixture corpus.
 
 # IEC 61850 SCL Sanitization Rules
 
@@ -202,6 +239,8 @@ Regenerate (preferred) or truncate (fallback) to meet limits (implementation reg
 12.8 `GSE` / `SMV` `cbName` → `GSEControl` / `SampledValueControl@name`.  
 12.9 `*Control@datSet` → new `DataSet@name`.
 12.10 `Terminal@connectivityNode` (and `ConnectivityNode@pathName`) → Reconstructed path string (see Rule 20).
+12.11 `ExtRef@iedName`, `ExtRef@ldInst`, `ExtRef@srcLDInst`, and `ExtRef@srcCBName` are randomized consistently in the same mapping namespace, even when the referenced publisher or local component is not present in the current SCL document.
+12.12 `ExtRef@intAddr` is cleared (`""`) to prevent leakage of internal engineering addresses and signal names.
 
 ## 13. Comment Preservation
 13.1 Preserve comments whose trimmed text starts with `OCL ERROR`.  
@@ -247,11 +286,13 @@ Regenerate (preferred) or truncate (fallback) to meet limits (implementation reg
 ## 18. Versioning
 18.1 Increment rules version on structural or semantic changes.  
 
-## 19. Change Log (since v2.8.1)
+## 19. Change Log
 - Added Rule 3.4: IED Owner synchronization with Header ID.
 - Added Rule 8.4/8.5/12.9: DataSet name randomization and reference updates.
 - Added Rule 20/12.10: Substation topology randomization and connectivity path reconstruction.
-- Version bump to 2.9.0.
+- Added Rule 12.11/12.12: ExtRef anonymization consistency and `intAddr` clearing for privacy.
+- Added deterministic fixture-based pytest coverage for mixed SCL file types (`.scd`, `.ssd`, `.cid`, `.icd`, `.iid`, `.sed`, `.scl`).
+- Updated test harness to sanitize copies in temporary directories only; generated files are not left in the repository.
 
 ## 20. Substation Topology
 
@@ -281,6 +322,7 @@ If an element beneath `<Substation>` has a `name` attribute, that attribute must
 ## Security / Privacy Note
 - Deterministic hash seeding can correlate identical originals across organizations.
 - Use non-deterministic mode when unlinkability is a priority.
+- External reference identifiers (`ExtRef`) and internal addresses (`intAddr`) are treated as sensitive metadata and are anonymized or cleared.
 
 ## Outcome
-Produces a structurally intact, anonymized SCL file safe for cross-organizational sharing. v2.9.0 adds deep topology anonymization and DataSet protection.
+Produces a structurally intact, anonymized SCL file safe for cross-organizational sharing. v2.9.0 adds deep topology anonymization and DataSet protection, deterministic fixture testing, and privacy-safe handling of `ExtRef` and `intAddr` metadata.

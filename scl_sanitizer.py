@@ -450,7 +450,9 @@ def synchronize_references(root: ET._Element, reg: IdRegistry):
             nm = ctl.get("name")
             if reg.has_old("GSESMV.cbName", nm):
                 ctl.set("name", reg.new("GSESMV.cbName", nm))
-                
+
+    # Rule 12.11: Anonymize remote reference identifiers consistently.
+    # Rule 12.12: clear internal signal addresses to avoid leaking engineering-specific mappings.
     for ext in root.xpath(".//scl:ExtRef", namespaces=NSMAP):
         rptID = ext.get("rptID");
         rcbName = ext.get("rcbName")
@@ -462,7 +464,7 @@ def synchronize_references(root: ET._Element, reg: IdRegistry):
 
         if intAddr is not None:
             ext.set("intAddr", "")
-            
+
         if reg.has_old("ReportControl.rptID", rptID):
             ext.set("rptID", reg.new("ReportControl.rptID", rptID))
 

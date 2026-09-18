@@ -327,6 +327,21 @@ def apply_primary_renames(root: ET._Element, reg: IdRegistry, rnd: Randomizer,
 
 def synchronize_references(root: ET._Element, reg: IdRegistry):
     # Rule 11.1–11.4, 11.5, 12.*, 8.2, 8.3, 9.3, 20.2, 21.2
+    def rewrite_ied_reference(value: Optional[str]) -> Optional[str]:
+        """Replace the IED-name component of a composite reference."""
+        if value is None:
+            return None
+
+        ied_name, separator, remainder = value.partition("/")
+        new_ied_name = reg.new("IED.name", ied_name)
+
+        if new_ied_name is None:
+            return value
+
+        if separator:
+            return f"{new_ied_name}/{remainder}"
+
+        return new_ied_name
     
     # 1. Standard Type References
     for ln in root.xpath(".//scl:LN | .//scl:LN0", namespaces=NSMAP):
@@ -443,6 +458,22 @@ def synchronize_references(root: ET._Element, reg: IdRegistry):
         if reg.has_old("ReportControl.name", rcbName):
             ext.set("rcbName", reg.new("ReportControl.name", rcbName))
 
+    # 7b. Update composite reference attributes that may embed an IED name.
+    # setSrcRef is the issue #3 case; related reference attributes are
+    # handled defensively because they use the same value pattern.
+    for elem in root.xpath(
+        ".//*[@setSrcRef or @setDstRef or @srcRef]",
+        namespaces=NSMAP,
+    ):
+        for attr in ("setSrcRef", "setDstRef", "srcRef"):
+            value = elem.get(attr)
+            if value is None:
+                continue
+
+            updated = rewrite_ied_reference(value)
+            if updated != value:
+                elem.set(attr, updated)
+                
     # 8. DataSet References (Rule 20.2)
     # Control blocks often refer to a dataset via 'datSet' attribute
     for cb_tag in ("ReportControl", "GSEControl", "SampledValueControl", "GSE", "SMV"):

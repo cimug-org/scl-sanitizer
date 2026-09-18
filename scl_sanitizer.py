@@ -455,16 +455,49 @@ def synchronize_references(root: ET._Element, reg: IdRegistry):
         rptID = ext.get("rptID");
         rcbName = ext.get("rcbName")
         srcCBName = ext.get("srcCBName")
+        iedName = ext.get("iedName")
+        ldInst = ext.get("ldInst")
+        srcLDInst = ext.get("srcLDInst")
+        intAddr = ext.get("intAddr")
 
+        if intAddr is not None:
+            ext.set("intAddr", "")
+            
         if reg.has_old("ReportControl.rptID", rptID):
             ext.set("rptID", reg.new("ReportControl.rptID", rptID))
 
         if reg.has_old("ReportControl.name", rcbName):
             ext.set("rcbName", reg.new("ReportControl.name", rcbName))
 
-        # Synchronize the publisher control-block reference.
-        if reg.has_old("GSESMV.cbName", srcCBName):
-            ext.set("srcCBName", reg.new("GSESMV.cbName", srcCBName))
+        # Synchronize known publisher control-block references, and anonymize
+        # unresolved external publisher control-block names.
+        if srcCBName:
+            ext.set(
+                "srcCBName",
+                reg.get_or_create(
+                    "GSESMV.cbName",
+                    srcCBName,
+                    MAX_CONTROL_BLOCK_NAME,
+                ),
+            )
+
+        # Subscriber-side IED/LDevice identifiers.
+        if reg.has_old("IED.name", iedName):
+            ext.set("iedName", reg.new("IED.name", iedName))
+
+        if reg.has_old("LDevice.inst", ldInst):
+            ext.set("ldInst", reg.new("LDevice.inst", ldInst))
+
+        # Publisher-side LDevice instance (shares the LDevice.inst namespace).
+        if srcLDInst:
+            ext.set(
+                "srcLDInst",
+                reg.get_or_create(
+                    "LDevice.inst",
+                    srcLDInst,
+                    MAX_LDEVICE_INST,
+                ),
+            )
 
     # 7b. Update composite reference attributes that may embed an IED name.
     # setSrcRef is the issue #3 case; related reference attributes are

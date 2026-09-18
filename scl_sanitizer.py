@@ -326,23 +326,22 @@ def apply_primary_renames(root: ET._Element, reg: IdRegistry, rnd: Randomizer,
                 el.set("name", reg.new(f"{tag}.name", nm))
 
 def synchronize_references(root: ET._Element, reg: IdRegistry):
-    def rewrite_embedded_ied_names(value: Optional[str]) -> Optional[str]:
-        """Replace IED names embedded in composite reference values."""
+    # Rule 11.1–11.4, 11.5, 12.*, 8.2, 8.3, 9.3, 20.2, 21.2
+    def rewrite_ied_reference(value: Optional[str]) -> Optional[str]:
+        """Replace the IED-name component of a composite reference."""
         if value is None:
             return None
 
-        updated = value
-        ied_map = reg.maps.get("IED.name", {})
+        ied_name, separator, remainder = value.partition("/")
+        new_ied_name = reg.new("IED.name", ied_name)
 
-        # Replace longer names first so overlapping names are handled safely.
-        for old_name in sorted(ied_map, key=len, reverse=True):
-            new_name = ied_map[old_name]
-            if old_name:
-                updated = updated.replace(old_name, new_name)
+        if new_ied_name is None:
+            return value
 
-        return updated
+        if separator:
+            return f"{new_ied_name}/{remainder}"
 
-    # Rule 11.1–11.4, 11.5, 12.*, 8.2, 8.3, 9.3, 20.2, 21.2
+        return new_ied_name
     
     # 1. Standard Type References
     for ln in root.xpath(".//scl:LN | .//scl:LN0", namespaces=NSMAP):
@@ -471,7 +470,7 @@ def synchronize_references(root: ET._Element, reg: IdRegistry):
             if value is None:
                 continue
 
-            updated = rewrite_embedded_ied_names(value)
+            updated = rewrite_ied_reference(value)
             if updated != value:
                 elem.set(attr, updated)
                 

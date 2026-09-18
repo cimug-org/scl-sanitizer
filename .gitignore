@@ -1,7 +1,20 @@
-# Byte-compiled / optimized / DLL files
+# Python bytecode / cache
 __pycache__/
 *.py[codz]
+*.py[cod]
 *$py.class
+*.pyo
+*.pyd
+
+# pytest cache
+.pytest_cache/
+
+# local virtualenvs
+.venv/
+venv/
+
+# optional: generated sanitizer outputs
+*_sanitized.*
 
 # C extensions
 *.so

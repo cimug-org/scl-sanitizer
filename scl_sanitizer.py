@@ -616,12 +616,15 @@ def clear_desc(root: ET._Element):
         e.set("desc","")
 
 def random_sensitive_value(dai: ET._Element, rnd: Randomizer) -> str:
-    da = dai.get("name")
+    dai_name = dai.get("name")
 
-    if da in {"latitude", "longitude"}:
+    if dai_name == "latitude":
+        return f"{rnd.rng.uniform(-90.0, 90.0):.6f}"
+
+    if dai_name == "longitude":
         return f"{rnd.rng.uniform(-180.0, 180.0):.6f}"
 
-    if da == "altitude":
+    if dai_name == "altitude":
         return f"{rnd.rng.uniform(-100.0, 5000.0):.2f}"
 
     return rnd.word(MAX_GENERIC_ID)

@@ -615,6 +615,17 @@ def clear_desc(root: ET._Element):
     for e in root.xpath(".//*[@desc]", namespaces=NSMAP):
         e.set("desc","")
 
+def random_sensitive_value(dai: ET._Element, rnd: Randomizer) -> str:
+    da = dai.get("name")
+
+    if da in {"latitude", "longitude"}:
+        return f"{rnd.rng.uniform(-180.0, 180.0):.6f}"
+
+    if da == "altitude":
+        return f"{rnd.rng.uniform(-100.0, 5000.0):.2f}"
+
+    return rnd.word(MAX_GENERIC_ID)
+
 def sanitize_sensitive_dai_values(root: ET._Element, rnd: Randomizer):
     """Sanitize sensitive identification values in standard nameplate DOIs."""
 
@@ -658,7 +669,7 @@ def sanitize_sensitive_dai_values(root: ET._Element, rnd: Randomizer):
                 continue
 
             for val in dai.xpath(".//scl:Val", namespaces=NSMAP):
-                val.text = rnd.word(MAX_GENERIC_ID)
+                val.text = random_sensitive_value(dai, rnd)
 
 def handle_comments(root: ET._Element):
     # Rule 13.1–13.3

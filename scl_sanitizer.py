@@ -576,6 +576,51 @@ def clear_desc(root: ET._Element):
     for e in root.xpath(".//*[@desc]", namespaces=NSMAP):
         e.set("desc","")
 
+def sanitize_sensitive_dai_values(root: ET._Element, rnd: Randomizer):
+    """Sanitize sensitive identification values in standard nameplate DOIs."""
+
+    sensitive_dais = {
+        "NamPlt": {
+            "vendor",
+            "swRev",
+            "d",
+            "dU",
+        },
+        "PhyNam": {
+            "vendor",
+            "hwRev",
+            "swRev",
+            "serNum",
+            "model",
+            "location",
+            "name",
+            "owner",
+            "ePSName",
+            "primeOper",
+            "secondOper",
+            "latitude",
+            "longitude",
+            "altitude",
+            "mRID",
+            "d",
+            "dU",
+        },
+    }
+
+    for doi in root.xpath(".//scl:DOI", namespaces=NSMAP):
+        doi_name = doi.get("name")
+        dai_names = sensitive_dais.get(doi_name)
+
+        if not dai_names:
+            continue
+
+        for dai in doi.xpath("./scl:DAI", namespaces=NSMAP):
+            if dai.get("name") not in dai_names:
+                continue
+
+            for val in dai.xpath(".//scl:Val", namespaces=NSMAP):
+                val.text = rnd.word(MAX_GENERIC_ID)
+
 def handle_comments(root: ET._Element):
     # Rule 13.1–13.3
     for comment in root.xpath("//comment()"):
@@ -678,6 +723,7 @@ def sanitize(path: str, seed: Optional[int] = None, hash_seed: bool = False, deb
     collect_ids(root, reg)
     apply_primary_renames(root, reg, rnd, header_id_map)
     synchronize_references(root, reg)
+    sanitize_sensitive_dai_values(root, rnd)
     randomize_addresses(root, rnd)
     clear_desc(root)
     handle_comments(root)

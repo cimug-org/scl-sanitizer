@@ -1,0 +1,96 @@
+name: Build and Publish Windows Release
+
+on:
+  push:
+    tags:
+      - "V*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Install build dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt
+          python -m pip install PySide6 PyInstaller
+
+      - name: Build executable
+        shell: pwsh
+        run: |
+          Remove-Item -Recurse -Force .\build, .\dist -ErrorAction SilentlyContinue
+          python -m PyInstaller --clean --noconfirm .\SCL-Sanitizer.spec
+
+      - name: Validate executable
+        shell: pwsh
+        run: |
+          $exe = ".\dist\SCL-Sanitizer.exe"
+
+          if (-not (Test-Path $exe)) {
+              throw "Executable was not created: $exe"
+          }
+
+          $size = (Get-Item $exe).Length
+
+          if ($size -le 0) {
+              throw "Executable is empty: $exe"
+          }
+
+          Write-Host "Created $exe"
+          Write-Host "Size: $size bytes"
+
+      - name: Create SHA-256 checksum
+        shell: pwsh
+        run: |
+          $exe = ".\dist\SCL-Sanitizer.exe"
+          $checksum = (Get-FileHash -Algorithm SHA256 $exe).Hash.ToLowerInvariant()
+
+          "$checksum  SCL-Sanitizer.exe" |
+            Set-Content -NoNewline ".\dist\SCL-Sanitizer.exe.sha256"
+
+          Write-Host "SHA-256: $checksum"
+
+      - name: Create or update GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $releaseExists = $true
+
+          gh release view $tag 2>$null
+
+          if ($LASTEXITCODE -ne 0) {
+              $releaseExists = $false
+          }
+
+          if (-not $releaseExists) {
+              gh release create $tag `
+                ".\dist\SCL-Sanitizer.exe" `
+                ".\dist\SCL-Sanitizer.exe.sha256" `
+                --title "SCL Sanitizer $tag" `
+                --generate-notes
+          }
+          else {
+              gh release upload $tag `
+                ".\dist\SCL-Sanitizer.exe" `
+                ".\dist\SCL-Sanitizer.exe.sha256" `
+                --clobber
+          }

@@ -15,6 +15,8 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 -->
 <img src="images/scl-sanitizer-logo.png" alt="alt text" width="25%" />
 
+[![Test SCL Sanitizer](https://github.com/cimug-org/scl-sanitizer/actions/workflows/test.yml
+
 **SCL Sanitizer** is an open source tool for anonymizing IEC 61850 SCL files and removing sensitive network-related information.
 
 ## Command-Line Interface (CLI) Usage

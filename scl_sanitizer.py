@@ -452,11 +452,19 @@ def synchronize_references(root: ET._Element, reg: IdRegistry):
                 ctl.set("name", reg.new("GSESMV.cbName", nm))
                 
     for ext in root.xpath(".//scl:ExtRef", namespaces=NSMAP):
-        rptID = ext.get("rptID"); rcbName = ext.get("rcbName")
+        rptID = ext.get("rptID");
+        rcbName = ext.get("rcbName")
+        srcCBName = ext.get("srcCBName")
+
         if reg.has_old("ReportControl.rptID", rptID):
             ext.set("rptID", reg.new("ReportControl.rptID", rptID))
+
         if reg.has_old("ReportControl.name", rcbName):
             ext.set("rcbName", reg.new("ReportControl.name", rcbName))
+
+        # Synchronize the publisher control-block reference.
+        if reg.has_old("GSESMV.cbName", srcCBName):
+            ext.set("srcCBName", reg.new("GSESMV.cbName", srcCBName))
 
     # 7b. Update composite reference attributes that may embed an IED name.
     # setSrcRef is the issue #3 case; related reference attributes are

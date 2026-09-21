@@ -1,10 +1,12 @@
 import sys
-import scl_sanitizer
-
 from pathlib import Path
-from PySide6.QtCore import QObject, Property, QUrl, Signal, Slot
+
+from PySide6.QtCore import Property, QObject, QUrl, Signal, Slot
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
+
+import scl_sanitizer
+
 
 def resource_path(relative_path: str) -> Path:
     """Return a path for source execution or a PyInstaller bundle."""
@@ -14,6 +16,7 @@ def resource_path(relative_path: str) -> Path:
         base_path = Path(__file__).resolve().parent
 
     return base_path / relative_path
+
 
 class SanitizerBridge(QObject):
     statusChanged = Signal(str)

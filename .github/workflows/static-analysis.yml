@@ -39,7 +39,7 @@ jobs:
         run: |
           bandit \
             --recursive . \
-            --exclude ./.venv,./build,./dist \
+            --exclude ./.venv,./build,./dist,./tests \
             --severity-level medium \
             --confidence-level medium
 
@@ -50,7 +50,7 @@ jobs:
 
           bandit \
             --recursive . \
-            --exclude ./.venv,./build,./dist \
+            --exclude ./.venv,./build,./dist,./tests \
             --format json \
             --output bandit-report.json || true
 

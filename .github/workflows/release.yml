@@ -55,9 +55,88 @@ jobs:
           Write-Host "Created $exe"
           Write-Host "Size: $size bytes"
 
+      - name: Sign Windows executable
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_CERTIFICATE_BASE64 }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+          WINDOWS_TIMESTAMP_URL: ${{ secrets.WINDOWS_TIMESTAMP_URL }}
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $exe = Join-Path $PWD "dist\SCL-Sanitizer.exe"
+          $certificatePath = Join-Path $env:RUNNER_TEMP "code-signing-certificate.pfx"
+
+          if (-not (Test-Path $exe)) {
+              throw "Executable not found: $exe"
+          }
+
+          if ([string]::IsNullOrWhiteSpace($env:WINDOWS_CERTIFICATE_BASE64)) {
+              throw "WINDOWS_CERTIFICATE_BASE64 secret is missing"
+          }
+
+          if ([string]::IsNullOrWhiteSpace($env:WINDOWS_CERTIFICATE_PASSWORD)) {
+              throw "WINDOWS_CERTIFICATE_PASSWORD secret is missing"
+          }
+
+          if ([string]::IsNullOrWhiteSpace($env:WINDOWS_TIMESTAMP_URL)) {
+              throw "WINDOWS_TIMESTAMP_URL secret is missing"
+          }
+
+          $certificateBytes = [Convert]::FromBase64String(
+              $env:WINDOWS_CERTIFICATE_BASE64
+          )
+
+          [IO.File]::WriteAllBytes(
+              $certificatePath,
+              $certificateBytes
+          )
+
+          $signTool = Get-ChildItem `
+              "${env:ProgramFiles(x86)}\Windows Kits\10\bin" `
+              -Recurse `
+              -Filter "signtool.exe" `
+              -ErrorAction SilentlyContinue |
+              Sort-Object FullName -Descending |
+              Select-Object -First 1
+
+          if ($null -eq $signTool) {
+              throw "signtool.exe was not found on the runner"
+          }
+
+          Write-Host "Using SignTool: $($signTool.FullName)"
+
+          & $signTool.FullName sign `
+              /fd SHA256 `
+              /f $certificatePath `
+              /p $env:WINDOWS_CERTIFICATE_PASSWORD `
+              /tr $env:WINDOWS_TIMESTAMP_URL `
+              /td SHA256 `
+              /d "SCL Sanitizer" `
+              $exe
+
+          if ($LASTEXITCODE -ne 0) {
+              throw "Code signing failed"
+          }
+
+          & $signTool.FullName verify `
+              /pa `
+              /all `
+              /v `
+              $exe
+
+          if ($LASTEXITCODE -ne 0) {
+              throw "Code-signature verification failed"
+          }
+
+          Remove-Item -Force $certificatePath
+
       - name: Create SHA-256 checksum
         shell: pwsh
         run: |
+          $ErrorActionPreference = "Stop"
+
           $exe = ".\dist\SCL-Sanitizer.exe"
           $checksum = (Get-FileHash -Algorithm SHA256 $exe).Hash.ToLowerInvariant()
 

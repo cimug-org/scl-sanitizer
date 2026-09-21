@@ -1,4 +1,4 @@
-name: Test SCL Sanitizer
+name: Unit Tests
 
 on:
   push:

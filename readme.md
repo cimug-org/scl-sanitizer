@@ -15,7 +15,10 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 -->
 <img src="images/scl-sanitizer-logo.png" alt="alt text" width="25%" />
 
-[![Sanitization pytests](https://github.com/cimug-org/scl-sanitizer/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/cimug-org/scl-sanitizer/actions/workflows/test.yml)
+[![Unit Tests](https://github.com/cimug-org/scl-sanitizer/actions/workflows/test.yml/badge.svg)](https://github.com/cimug-org/scl-sanitizer/actions/workflows/test.yml)
+[![Static Analysis](https://github.com/cimug-org/scl-sanitizer/actions/workflows/static-analysis.yml/badge.svg)](https://github.com/cimug-org/scl-sanitizer/actions/workflows/static-analysis.yml)
+[![CodeQL](https://github.com/cimug-org/scl-sanitizer/actions/workflows/codeql.yml/badge.svg)](https://github.com/cimug-org/scl-sanitizer/actions/workflows/codeql.yml)
+[![Build and Publish Release](https://github.com/cimug-org/scl-sanitizer/actions/workflows/release.yml/badge.svg)](https://github.com/cimug-org/scl-sanitizer/actions/workflows/release.yml)
 
 **SCL Sanitizer** is an open source tool for anonymizing IEC 61850 SCL files and removing sensitive network-related information.
 
